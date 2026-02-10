@@ -1,96 +1,223 @@
 // HUNTRIX: Idols by Day, Hunters by Night
 // Por: Azul Ibáñez Presa (Legajo 122734/1)
 // Basado en la película "Kpop Demon Hunters"
-// Profesor: Matías 
 
-let estadoActual = 'p0';
+let estadoActual = 0;
 let imagenes = [];
 let sonidos = {};
 let musicaActual = null;
+let pantallas = [];
 
-// PRELOAD - Carga todas las imágenes y sonidos
 function preload() {
   // Cargar imágenes
-  imagenes[0] = loadImage('data/portada.jpeg');
-  imagenes[1] = loadImage('data/ensayo.jpeg');
-  imagenes[2] = loadImage('data/ruidos.jpeg');
-  imagenes[3] = loadImage('data/ataque.ensayo.jpeg');
-  imagenes[4] = loadImage('data/backstage.encuentro.jpeg');
-  imagenes[5] = loadImage('data/rumivsjinu.jpeg');
-  imagenes[6] = loadImage('data/traicion.rumores.jpeg');
-  imagenes[7] = loadImage('data/ruptura.jpeg');
-  imagenes[8] = loadImage('data/rumisola.jpeg');
-  imagenes[9] = loadImage('data/jinu.llorando.jpeg');
-  imagenes[10] = loadImage('data/despierta.gwima.jpeg');
-  imagenes[11] = loadImage('data/reencuentro.jpeg');
-  imagenes[12] = loadImage('data/rumisola.jpeg');
-  imagenes[13] = loadImage('data/creditos.png');
+  let nombres = ['portada', 'ensayo', 'ruidos', 'ataque.ensayo', 'backstage.encuentro',
+                 'rumivsjinu', 'traicion.rumores', 'ruptura', 'rumisola', 'jinu.llorando',
+                 'despierta.gwima', 'reencuentro', 'rumisola', 'creditos'];
   
-  imagenes['final1'] = loadImage('data/f1.honmoon.jpeg');
-  imagenes['final2'] = loadImage('data/f2.poseida.jpeg');
-  imagenes['final3'] = loadImage('data/f3.beso.jpeg');
+  for (let i = 0; i < nombres.length; i++) {
+    imagenes[i] = loadImage('data/' + nombres[i] + (i === 13 ? '.png' : '.jpeg'));
+  }
   
-  // Cargar sonidos (SIN .mp3.mp3, solo .mp3)
-  sonidos.portada = loadSound('data/portada.mp3');
-  sonidos.ensayo = loadSound('data/ensayo.mp3');
-  sonidos.rugido = loadSound('data/rugido.mp3');
-  sonidos.demonio = loadSound('data/demonio.mp3');
-  sonidos.audiencia = loadSound('data/audiencia.mp3');
-  sonidos.demonio2 = loadSound('data/demonio2.mp3');
-  sonidos.golden = loadSound('data/golden.mp3');
-  sonidos.free = loadSound('data/free.mp3');
-  sonidos.youridol = loadSound('data/youridol.mp3');
+  imagenes[14] = loadImage('data/f1.honmoon.jpeg');
+  imagenes[15] = loadImage('data/f2.poseida.jpeg');
+  imagenes[16] = loadImage('data/f3.beso.jpeg');
+  
+  // Cargar sonidos
+  let nombresSonidos = ['portada', 'ensayo', 'rugido', 'demonio', 'audiencia', 
+                        'demonio2', 'golden', 'free', 'youridol'];
+  for (let nombre of nombresSonidos) {
+    sonidos[nombre] = loadSound('data/' + nombre + '.mp3');
+  }
 }
-// SETUP - Configuración inicial
+
 function setup() {
   createCanvas(640, 480);
   textAlign(CENTER, CENTER);
-  textSize(20);
   textFont('Arial');
   
-  // Reproducir música de portada
+  // DEFINIR TODAS LAS PANTALLAS
+  pantallas = [
+    // 0 - PORTADA
+    {
+      img: 0,
+      texto: "",
+      botones: [
+        {texto: "COMENZAR", x: 150, y: 380, w: 170, h: 60, siguiente: 1, musica: 'ensayo'},
+        {texto: "CRÉDITOS", x: 330, y: 380, w: 170, h: 60, siguiente: 13, musica: null}
+      ]
+    },
+    // 1 - ENSAYO
+    {
+      img: 1,
+      texto: "Huntrix está ensayando para su\npróximo concierto.\n¡Todo parece ir perfecto!",
+      botones: [
+        {texto: "Continuar →", x: 220, y: 410, w: 200, h: 50, siguiente: 2, efecto: 'rugido', musica: null}
+      ]
+    },
+    // 2 - RUIDOS
+    {
+      img: 2,
+      texto: "Un ruido extraño provenía de la puerta...\nAlgo no estaba bien.\n¿Qué debería hacer Rumi?",
+      botones: [
+        {texto: "Ignorar la vibración", x: 60, y: 410, w: 220, h: 60, siguiente: 3, efecto: 'demonio'},
+        {texto: "Investigar la vibración", x: 360, y: 410, w: 220, h: 60, siguiente: 4, musica: null}
+      ]
+    },
+    // 3 - ATAQUE
+    {
+      img: 3,
+      texto: "En los espejos se ve algo...\n¡Es un ataque demoníaco!\n¿Qué hará el grupo?",
+      botones: [
+        {texto: "Usar armas mágicas", x: 60, y: 410, w: 220, h: 60, siguiente: 5, musica: null},
+        {texto: "Escapar al backstage", x: 360, y: 410, w: 220, h: 60, siguiente: 4, musica: null}
+      ]
+    },
+    // 4 - BACKSTAGE
+    {
+      img: 4,
+      texto: "En el backstage oscuro aparece...\n¡Jinu, el esclavo de Gwi-ma!\nSu mirada se ve sospechosa...\n¿Qué hará Rumi?",
+      botones: [
+        {texto: "Hablar con Jinu", x: 60, y: 410, w: 220, h: 60, siguiente: 9, musica: null},
+        {texto: "Atacarlo", x: 360, y: 410, w: 220, h: 60, siguiente: 5, efecto: 'demonio'}
+      ]
+    },
+    // 5 - RUMI VS JINU
+    {
+      img: 5,
+      texto: "La transformación de Jinu sorprendio a Rumi.\n¡Era un desafío!.\nRumi sintió que necesitab hacer algo pero ya...",
+      botones: [
+        {texto: "Cantar 'Takedown'", x: 60, y: 410, w: 220, h: 60, siguiente: 6, efecto: 'audiencia'},
+        {texto: "Intentar escapar", x: 360, y: 410, w: 220, h: 60, siguiente: 6, efecto: 'audiencia'}
+      ]
+    },
+    // 6 - TRAICIÓN
+    {
+      img: 6,
+      texto: "Jinu esparce rumores sobre Rumi siendo esclavada de Gwi-ma.\nMira y Zoey se sienten traicionadas.\n¿Qué hará Rumi?",
+      botones: [
+        {texto: "Pedir perdón", x: 60, y: 410, w: 220, h: 60, siguiente: 7, musica: null},
+        {texto: "Culpar a Jinu", x: 360, y: 410, w: 220, h: 60, siguiente: 7, musica: null}
+      ]
+    },
+    // 7 - RUPTURA
+    {
+      img: 7,
+      texto: "Huntrix se separa...\nRumi debe decidir su camino:\n¿luchar sola o buscar ayuda?",
+      botones: [
+        {texto: "Buscar a Jinu", x: 60, y: 410, w: 220, h: 60, siguiente: 9, musica: null},
+        {texto: "Luchar sola", x: 360, y: 410, w: 220, h: 60, siguiente: 8, efecto: 'rugido'}
+      ]
+    },
+    // 8 - RUMI SOLA
+    {
+      img: 8,
+      texto: "Rumi decide enfrentarse sola\na los demonios.\nPero la batalla es demasiado difícil...",
+      botones: [
+        {texto: "Ver Final →", x: 220, y: 410, w: 200, h: 60, siguiente: 15, musica: 'youridol'}
+      ]
+    },
+    // 9 - JINU LLORANDO
+    {
+      img: 9,
+      texto: "Jinu revela su pasado oscuro:\nÉl también tiene sangre demoníaca.\nPor eso comprende a Rumi.",
+      botones: [
+        {texto: "Aceptar su ayuda", x: 60, y: 410, w: 220, h: 60, siguiente: 10, musica: null},
+        {texto: "Rechazarlo", x: 360, y: 410, w: 220, h: 60, siguiente: 10, efecto: 'demonio'}
+      ]
+    },
+    // 10 - DESPIERTA GWI-MA
+    {
+      img: 10,
+      texto: "¡Gwi-Ma, el demonio ancestral,\ndespierta! Solo un canto perfecto\npuede sellarlo. Rumi debe actuar.",
+      botones: [
+        {texto: "Formar grupo unido", x: 60, y: 410, w: 220, h: 60, siguiente: 11, musica: null},
+        {texto: "Intentar sellar sola", x: 360, y: 410, w: 220, h: 60, siguiente: 12, efecto: 'demonio'}
+      ]
+    },
+    // 11 - REENCUENTRO
+    {
+      img: 11,
+      texto: "¡Mira y Zoey regresan!\nHuntrix se reúne para el canto final.\n¿Qué estrategia usarán?",
+      botones: [
+        {texto: "Cantar 'Golden'", x: 60, y: 410, w: 220, h: 60, siguiente: 14, musica: 'golden'},
+        {texto: "Usar alma de Jinu", x: 360, y: 410, w: 220, h: 60, siguiente: 16, musica: 'free'}
+      ]
+    },
+    // 12 - RUMI SOLA VS GWI-MA
+    {
+      img: 12,
+      texto: "Rumi enfrenta a Gwi-Ma sola.\nSu poder demoníaco despierta.\n¿Podrá controlarlo?",
+      botones: [
+        {texto: "Ver Final →", x: 220, y: 410, w: 200, h: 60, siguiente: 15, musica: 'youridol'}
+      ]
+    },
+    // 13 - CRÉDITOS
+    {
+      img: 13,
+      texto: "",
+      botones: [
+        {texto: "VOLVER AL INICIO", x: 220, y: 420, w: 200, h: 50, siguiente: 0, musica: 'portada'}
+      ]
+    },
+    // 14 - FINAL 1 (BUENO)
+    {
+      img: 14,
+      texto: "🌟 FINAL 1 🌟\nLa Luz del Honmoon\n\nHuntrix derrota a Gwi-Ma.\n¡El grupo conquista los escenarios!",
+      botones: [
+        {texto: "VOLVER AL INICIO", x: 220, y: 400, w: 200, h: 60, siguiente: 0, musica: 'portada'}
+      ]
+    },
+    // 15 - FINAL 2 (MALO)
+    {
+      img: 15,
+      texto: "💀 FINAL 2 💀\nCaída del Mundo\n\nRumi se convierte en demonio.\nEl mundo cae en oscuridad.",
+      botones: [
+        {texto: "VOLVER AL INICIO", x: 220, y: 400, w: 200, h: 60, siguiente: 0, musica: 'portada'}
+      ]
+    },
+    // 16 - FINAL 3 (ALTERNATIVO)
+    {
+      img: 16,
+      texto: "💫 FINAL 3 💫\nRedención de las Sombras\n\nJinu sacrifica su alma...\nRumi honra su memoria...",
+      botones: [
+        {texto: "VOLVER AL INICIO", x: 220, y: 400, w: 200, h: 60, siguiente: 0, musica: 'portada'}
+      ]
+    }
+  ];
+  
   reproducirMusica(sonidos.portada);
 }
 
-// DRAW - Dibuja la pantalla actual
 function draw() {
   background(0);
   
-  // Mostrar la pantalla correspondiente
-  if (estadoActual === 'p0') pantalla0();
-  else if (estadoActual === 'p1') pantalla1();
-  else if (estadoActual === 'p2') pantalla2();
-  else if (estadoActual === 'p3') pantalla3();
-  else if (estadoActual === 'p4') pantalla4();
-  else if (estadoActual === 'p5') pantalla5();
-  else if (estadoActual === 'p6') pantalla6();
-  else if (estadoActual === 'p7') pantalla7();
-  else if (estadoActual === 'p8') pantalla8();
-  else if (estadoActual === 'p9') pantalla9();
-  else if (estadoActual === 'p10') pantalla10();
-  else if (estadoActual === 'p11') pantalla11();
-  else if (estadoActual === 'p12') pantalla12();
-  else if (estadoActual === 'p13') pantalla13();
-  else if (estadoActual === 'final1') pantallaFinal1();
-  else if (estadoActual === 'final2') pantallaFinal2();
-  else if (estadoActual === 'final3') pantallaFinal3();
+  let p = pantallas[estadoActual];
+  
+  // Dibujar imagen de fondo
+  image(imagenes[p.img], 0, 0, 640, 480);
+  
+  // Dibujar texto (si hay y obvi q hay)
+  if (p.texto !== "") {
+    cuadroTexto(p.texto, 50, 280, 540, 120);
+  }
+  
+  // Dibujar todos los botones
+  for (let i = 0; i < p.botones.length; i++) {
+    let b = p.botones[i];
+    boton(b.texto, b.x, b.y, b.w, b.h);
+  }
 }
 
-// ========================================
-// FUNCIONES DE UTILIDAD
-// ========================================
+// FUNCIONES AUXILIARES
 
-// Dibuja un cuadro de texto con fondo
 function cuadroTexto(texto, x, y, ancho, alto) {
   fill(0, 0, 0, 180);
   rect(x, y, ancho, alto, 10);
   fill(255);
-  textSize(18);
+  textSize(15);
   text(texto, x + ancho/2, y + alto/2);
-  textSize(20);
 }
 
-// Dibuja un botón interactivo
 function boton(texto, x, y, ancho, alto) {
   if (sobreArea(x, y, ancho, alto)) {
     fill(150, 50, 200, 220);
@@ -101,362 +228,80 @@ function boton(texto, x, y, ancho, alto) {
   fill(255);
   textSize(16);
   text(texto, x + ancho/2, y + alto/2);
-  textSize(20);
 }
 
-// Verifica si el mouse está sobre un área
 function sobreArea(x, y, ancho, alto) {
   return mouseX > x && mouseX < x + ancho && 
          mouseY > y && mouseY < y + alto;
 }
 
-// ========================================
-// SISTEMA DE SONIDOS
-// ========================================
-
-// Reproduce una música (detiene la anterior)
 function reproducirMusica(sonido) {
-  // Si hay música sonando y es diferente, detenerla
   if (musicaActual && musicaActual.isPlaying()) {
     musicaActual.stop();
   }
-  
-  // Reproducir nueva música en loop
   if (sonido && !sonido.isPlaying()) {
     sonido.loop();
     musicaActual = sonido;
   }
 }
 
-// Reproduce un efecto de sonido SIN detener la música
 function reproducirEfecto(sonido) {
   if (sonido) {
     sonido.play();
   }
 }
 
-// ========================================
-// PANTALLAS DEL JUEGO
-// ========================================
+// INTERACCIÓN 
 
-// PANTALLA 0 - Portada
-function pantalla0() {
-  image(imagenes[0], 0, 0, 640, 480);
-  boton("COMENZAR", 150, 380, 170, 60);
-  boton("CRÉDITOS", 330, 380, 170, 60);
-}
-
-// PANTALLA 1 - Ensayo
-function pantalla1() {
-  image(imagenes[1], 0, 0, 640, 480);
-  cuadroTexto("Huntrix está ensayando para su\npróximo concierto.\n¡Todo parece ir perfecto!", 50, 320, 540, 120);
-  boton("Continuar →", 220, 410, 200, 50);
-}
-
-// PANTALLA 2 - Ruidos misteriosos
-function pantalla2() {
-  image(imagenes[2], 0, 0, 640, 480);
-  cuadroTexto("De repente, una extraña vibración\nrecorre el lugar...\n¿Qué debería hacer Rumi?", 50, 280, 540, 120);
-  boton("Ignorar la vibración", 60, 410, 220, 60);
-  boton("Investigar la vibración", 360, 410, 220, 60);
-}
-
-// PANTALLA 3 - Ataque en el ensayo
-function pantalla3() {
-  image(imagenes[3], 0, 0, 640, 480);
-  cuadroTexto("¡Las luces se vuelven rojas!\n¡Es un ataque demoníaco!\n¿Qué hará el grupo?", 50, 280, 540, 120);
-  boton("Usar armas mágicas", 60, 410, 220, 60);
-  boton("Escapar al backstage", 360, 410, 220, 60);
-}
-
-// PANTALLA 4 - Encuentro en el backstage
-function pantalla4() {
-  image(imagenes[4], 0, 0, 640, 480);
-  cuadroTexto("En el backstage oscuro aparece...\n¡Jinu, el idol desaparecido!\nSus ojos brillan extrañamente.", 50, 280, 540, 120);
-  boton("Hablar con Jinu", 60, 410, 220, 60);
-  boton("Atacarlo", 360, 410, 220, 60);
-}
-
-// PANTALLA 5 - Rumi vs Jinu
-function pantalla5() {
-  image(imagenes[5], 0, 0, 640, 480);
-  cuadroTexto("¡Jinu propone un duelo musical!\nRumi debe elegir su canción.\n¿Cuál será?", 50, 280, 540, 120);
-  boton("Cantar 'Takedown'", 60, 410, 220, 60);
-  boton("Intentar escapar", 360, 410, 220, 60);
-}
-
-// PANTALLA 6 - Traición y rumores
-function pantalla6() {
-  image(imagenes[6], 0, 0, 640, 480);
-  cuadroTexto("Jinu esparce rumores sobre Rumi.\nMira y Zoey se sienten traicionadas.\n¿Qué hará Rumi?", 50, 280, 540, 120);
-  boton("Pedir perdón", 60, 410, 220, 60);
-  boton("Culpar a Jinu", 360, 410, 220, 60);
-}
-
-// PANTALLA 7 - Ruptura del grupo
-function pantalla7() {
-  image(imagenes[7], 0, 0, 640, 480);
-  cuadroTexto("Huntrix se separa.\nRumi debe decidir su camino:\n¿luchar sola o buscar ayuda?", 50, 280, 540, 120);
-  boton("Buscar a Jinu", 60, 410, 220, 60);
-  boton("Luchar sola", 360, 410, 220, 60);
-}
-
-// PANTALLA 8 - Rumi sola → FINAL 2
-function pantalla8() {
-  image(imagenes[8], 0, 0, 640, 480);
-  cuadroTexto("Rumi decide enfrentarse sola\na los demonios.\nPero la batalla es demasiado difícil...", 50, 280, 540, 120);
-  boton("Ver Final →", 220, 410, 200, 60);
-}
-
-// PANTALLA 9 - Jinu llorando
-function pantalla9() {
-  image(imagenes[9], 0, 0, 640, 480);
-  cuadroTexto("Jinu revela su pasado oscuro:\nÉl también tiene sangre demoníaca.\nPor eso comprende a Rumi.", 50, 280, 540, 120);
-  boton("Aceptar su ayuda", 60, 410, 220, 60);
-  boton("Rechazarlo", 360, 410, 220, 60);
-}
-
-// PANTALLA 10 - Despierta Gwi-Ma
-function pantalla10() {
-  image(imagenes[10], 0, 0, 640, 480);
-  cuadroTexto("¡Gwi-Ma, el demonio ancestral,\ndespierta! Solo un canto perfecto\npuede sellarlo. Rumi debe actuar.", 50, 280, 540, 120);
-  boton("Formar grupo unido", 60, 410, 220, 60);
-  boton("Intentar sellar sola", 360, 410, 220, 60);
-}
-
-// PANTALLA 11 - Reencuentro
-function pantalla11() {
-  image(imagenes[11], 0, 0, 640, 480);
-  cuadroTexto("¡Mira y Zoey regresan!\nHuntrix se reúne para el canto final.\n¿Qué estrategia usarán?", 50, 280, 540, 120);
-  boton("Cantar 'Golden'", 60, 410, 220, 60);
-  boton("Usar alma de Jinu", 360, 410, 220, 60);
-}
-
-// PANTALLA 12 - Rumi sola contra Gwi-Ma → FINAL 2
-function pantalla12() {
-  image(imagenes[12], 0, 0, 640, 480);
-  cuadroTexto("Rumi enfrenta a Gwi-Ma sola.\nSu poder demoníaco despierta.\n¿Podrá controlarlo?", 50, 280, 540, 120);
-  boton("Ver Final →", 220, 410, 200, 60);
-}
-
-// PANTALLA 13 - Créditos
-function pantalla13() {
-  image(imagenes[13], 0, 0, 640, 480);
-  boton("VOLVER AL INICIO", 220, 420, 200, 50);
-}
-
-// ========================================
-// FINALES
-// ========================================
-
-// FINAL 1 - La Luz del Honmoon (Bueno)
-function pantallaFinal1() {
-  image(imagenes['final1'], 0, 0, 640, 480);
-  
-  cuadroTexto("🌟 FINAL 1 🌟\n" +
-              "La Luz del Honmoon\n\n" +
-              "Huntrix derrota a Gwi-Ma\n" +
-              "con su canto unido.\n" +
-              "Rumi y Jinu controlan\n" +
-              "su poder demoníaco.\n" +
-              "¡El grupo conquista\n" +
-              "los escenarios!", 
-              50, 80, 540, 280);
-  
-  boton("VOLVER AL INICIO", 220, 400, 200, 60);
-}
-
-// FINAL 2 - Caída del Mundo (Malo)
-function pantallaFinal2() {
-  image(imagenes['final2'], 0, 0, 640, 480);
-  
-  cuadroTexto("💀 FINAL 2 💀\n" +
-              "Caída del Mundo\n\n" +
-              "Rumi no puede controlar\n" +
-              "su poder demoníaco.\n" +
-              "Se convierte en demonio.\n" +
-              "El mundo cae en oscuridad.\n" +
-              "Huntrix se pierde\n" +
-              "para siempre.", 
-              50, 80, 540, 280);
-  
-  boton("VOLVER AL INICIO", 220, 400, 200, 60);
-}
-
-// FINAL 3 - Redención de las Sombras (Alternativo)
-function pantallaFinal3() {
-  image(imagenes['final3'], 0, 0, 640, 480);
-  
-  cuadroTexto("💫 FINAL 3 💫\n" +
-              "Redención de las Sombras\n\n" +
-              "El sello se mantiene pero\n" +
-              "Jinu sacrifica su alma.\n" +
-              "Rumi continúa con Huntrix,\n" +
-              "honrando su memoria.\n" +
-              "Una leyenda triste\n" +
-              "pero hermosa.", 
-              50, 80, 540, 280);
-  
-  boton("VOLVER AL INICIO", 220, 400, 200, 60);
-}
-
-// ========================================
-// CONTROL DE CLICKS + SONIDOS
-// ========================================
 function mousePressed() {
-  // PANTALLA 0 - Portada
-  if (estadoActual === 'p0') {
-    if (sobreArea(150, 380, 170, 60)) {
-      estadoActual = 'p1';
-      reproducirMusica(sonidos.ensayo);
-    }
-    if (sobreArea(330, 380, 170, 60)) {
-      estadoActual = 'p13';
-    }
-  }
+  let p = pantallas[estadoActual];
   
-  // PANTALLA 1
-  else if (estadoActual === 'p1') {
-    if (sobreArea(220, 410, 200, 50)) {
-      estadoActual = 'p2';
-      reproducirEfecto(sonidos.rugido);
-    }
-  }
-  
-  // PANTALLA 2
-  else if (estadoActual === 'p2') {
-    if (sobreArea(60, 410, 220, 60)) {
-      estadoActual = 'p3';
-      reproducirMusica(sonidos.demonio);
-    }
-    if (sobreArea(360, 410, 220, 60)) {
-      estadoActual = 'p4';
-      reproducirMusica(sonidos.demonio);
-    }
-  }
-  
-  // PANTALLA 3
-  else if (estadoActual === 'p3') {
-    if (sobreArea(60, 410, 220, 60)) estadoActual = 'p5';
-    if (sobreArea(360, 410, 220, 60)) estadoActual = 'p4';
-  }
-  
-  // PANTALLA 4
-  else if (estadoActual === 'p4') {
-    if (sobreArea(60, 410, 220, 60)) estadoActual = 'p9';
-    if (sobreArea(360, 410, 220, 60)) estadoActual = 'p5';
-  }
-  
-  // PANTALLA 5
-  else if (estadoActual === 'p5') {
-    if (sobreArea(60, 410, 220, 60)) {
-      estadoActual = 'p6';
-      reproducirMusica(sonidos.demonio2);
-    }
-    if (sobreArea(360, 410, 220, 60)) estadoActual = 'p6';
-  }
-  
-  // PANTALLA 6
-  else if (estadoActual === 'p6') {
-    if (sobreArea(60, 410, 220, 60)) estadoActual = 'p7';
-    if (sobreArea(360, 410, 220, 60)) estadoActual = 'p7';
-  }
-  
-  // PANTALLA 7
-  else if (estadoActual === 'p7') {
-    if (sobreArea(60, 410, 220, 60)) estadoActual = 'p9';
-    if (sobreArea(360, 410, 220, 60)) estadoActual = 'p8';
-  }
-  
-  // PANTALLA 8 → FINAL 2
-  else if (estadoActual === 'p8') {
-    if (sobreArea(220, 410, 200, 60)) {
-      estadoActual = 'final2';
-      reproducirMusica(sonidos.free);
-    }
-  }
-  
-  // PANTALLA 9
-  else if (estadoActual === 'p9') {
-    if (sobreArea(60, 410, 220, 60)) estadoActual = 'p10';
-    if (sobreArea(360, 410, 220, 60)) estadoActual = 'p10';
-  }
-  
-  // PANTALLA 10
-  else if (estadoActual === 'p10') {
-    if (sobreArea(60, 410, 220, 60)) {
-      estadoActual = 'p11';
-      reproducirMusica(sonidos.audiencia);
-    }
-    if (sobreArea(360, 410, 220, 60)) estadoActual = 'p12';
-  }
-  
-  // PANTALLA 11
-  else if (estadoActual === 'p11') {
-    if (sobreArea(60, 410, 220, 60)) {
-      estadoActual = 'final1';
-      reproducirMusica(sonidos.golden);
-    }
-    if (sobreArea(360, 410, 220, 60)) {
-      estadoActual = 'final3';
-      reproducirMusica(sonidos.youridol);
-    }
-  }
-  
-  // PANTALLA 12 → FINAL 2
-  else if (estadoActual === 'p12') {
-    if (sobreArea(220, 410, 200, 60)) {
-      estadoActual = 'final2';
-      reproducirMusica(sonidos.free);
-    }
-  }
-  
-  // PANTALLA 13 - Créditos
-  else if (estadoActual === 'p13') {
-    if (sobreArea(220, 420, 200, 50)) {
-      estadoActual = 'p0';
-      reproducirMusica(sonidos.portada);
-    }
-  }
-  
-  // FINALES - Volver al inicio
-  else if (estadoActual === 'final1' || estadoActual === 'final2' || estadoActual === 'final3') {
-    if (sobreArea(220, 400, 200, 60)) {
-      estadoActual = 'p0';
-      reproducirMusica(sonidos.portada);
+  for (let i = 0; i < p.botones.length; i++) {
+    let b = p.botones[i];
+    
+    if (sobreArea(b.x, b.y, b.w, b.h)) {
+      // detener musica actual
+      if (musicaActual && musicaActual.isPlaying()) {
+        musicaActual.stop();
+      }
+      
+      // cambiar de pantalla
+      estadoActual = b.siguiente;
+      
+      // reproducir nueva musica si hay
+      if (b.musica) {
+        reproducirMusica(sonidos[b.musica]);
+      }
+      
+      // reproducir efecto si hay
+      if (b.efecto) {
+        reproducirEfecto(sonidos[b.efecto]);
+      }
+      
+      break;
     }
   }
 }
 
-// ========================================
-// ATAJOS DE TECLADO (para testear)
-// ========================================
+// ATAJOS DE TECLADO 
+
 function keyPressed() {
-  // Presiona 'R' para reiniciar
   if (key === 'r' || key === 'R') {
-    estadoActual = 'p0';
+    estadoActual = 0;
     reproducirMusica(sonidos.portada);
   }
-  
-  // Presiona '1' para ir a Final 1
   if (key === '1') {
-    estadoActual = 'final1';
+    estadoActual = 14;
     reproducirMusica(sonidos.golden);
   }
-  
-  // Presiona '2' para ir a Final 2
   if (key === '2') {
-    estadoActual = 'final2';
-    reproducirMusica(sonidos.free);
-  }
-  
-  // Presiona '3' para ir a Final 3
-  if (key === '3') {
-    estadoActual = 'final3';
+    estadoActual = 15;
     reproducirMusica(sonidos.youridol);
   }
-  
-  // Presiona 'M' para mutear/desmutear
+  if (key === '3') {
+    estadoActual = 16;
+    reproducirMusica(sonidos.free);
+  }
   if (key === 'm' || key === 'M') {
     if (musicaActual && musicaActual.isPlaying()) {
       musicaActual.pause();
