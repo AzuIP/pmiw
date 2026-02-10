@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HUNTRIX - KPOP Demon Hunters</title>
   
-  <!-- Librería p5.js -->
+  <!-- p5.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
   
-  <!-- Librería p5.sound.js (IMPORTANTE PARA EL AUDIO) -->
+  <!-- p5.sound para audio -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/addons/p5.sound.min.js"></script>
   
   <style>
@@ -19,16 +19,42 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: #000;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      font-family: Arial, sans-serif;
     }
+    
     canvas {
-      border: 2px solid #ff69b4;
-      box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+      border: 3px solid #ff69b4;
+      box-shadow: 0 0 30px rgba(255, 105, 180, 0.6);
+      border-radius: 5px;
+    }
+    
+    /* mensaje mientras carga */
+    #loading {
+      position: absolute;
+      color: #ff69b4;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    /* oculta el loading feo ese q me salia cada tanto de p5 */
+    #p5_loading {
+      display: none !important;
     }
   </style>
 </head>
 <body>
-  <!-- Tu código de p5.js -->
+  <div id="loading">Cargando HUNTRIX...</div> 
+  
   <script src="sketch.js"></script>
+  
+  <script>
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        document.getElementById('loading').style.display = 'none';
+      }, 1000);
+    });
+  </script>
 </body>
 </html>
